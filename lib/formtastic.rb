@@ -1390,11 +1390,17 @@ module Formtastic #:nodoc:
         collection = find_raw_collection_for_column(column, options)
 
         # Return if we have an Array of strings, fixnums or arrays
-        return collection if (collection.instance_of?(Array) || collection.instance_of?(Range)) &&
-                             [Array, Fixnum, String, Symbol].include?(collection.first.class)
+        if (collection.instance_of?(Array) || collection.instance_of?(Range)) &&
+           [Array, Fixnum, String, Symbol].include?(collection.first.class)
+          
+          return collection if options[:label_method].blank?
 
-        label, value = detect_label_and_value_method!(collection, options)
-        collection.map { |o| [send_or_call(label, o), send_or_call(value, o)] }
+          label, value = detect_label_and_value_method!(collection, options)
+          collection.map { |o| [send_or_call(label, o), o] }
+        else
+          label, value = detect_label_and_value_method!(collection, options)
+          collection.map { |o| [send_or_call(label, o), send_or_call(value, o)] }
+        end
       end
 
       # As #find_collection_for_column but returns the collection without mapping the label and value

@@ -275,6 +275,16 @@ module CustomMacros
               output_buffer.should have_tag("form li fieldset ol li label[@for='post_author_category_name_development']")
               output_buffer.should have_tag("form li fieldset ol li label[@for='post_author_category_name_quasiserious_inventions']")
             end
+
+            it 'should call the custom label method' do
+              @bob.stub!(:category_name).and_return(@categories)
+              semantic_form_for(@new_post) do |builder|
+                builder.semantic_fields_for(@bob) do |bob_builder|
+                  concat(bob_builder.input(:category_name, :as => as, :collection => @categories, :label_method => Proc.new { |t| "A custom label" }))
+                end
+              end
+              output_buffer.should have_tag('form li fieldset ol li label', /A custom label/, :count => @categories.size)
+            end
           end
         end
 
